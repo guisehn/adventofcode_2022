@@ -37,7 +37,7 @@ fn main() {
 }
 
 fn read_input() -> String {
-    fs::read_to_string("input.txt").expect("Error reading file")
+    fs::read_to_string("input.txt").unwrap()
 }
 
 fn get_rounds(input: String) -> Vec<Round> {
@@ -50,8 +50,8 @@ fn get_rounds(input: String) -> Vec<Round> {
                 .collect();
 
             let round_goal = PartialRound {
-                opponent: char_to_shape(*chars.get(0).expect("Missing 1st char")),
-                outcome: char_to_outcome(*chars.get(1).expect("Missing 2nd char")),
+                opponent: char_to_shape(*chars.get(0).unwrap()),
+                outcome: char_to_outcome(*chars.get(1).unwrap()),
             };
 
             complete_round(round_goal)

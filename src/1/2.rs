@@ -13,7 +13,7 @@ fn main() {
 }
 
 fn read_lines() -> Vec<String> {
-    let contents: String = fs::read_to_string("input.txt").expect("Error reading file");
+    let contents: String = fs::read_to_string("input.txt").unwrap();
     contents.split("\n\n").map(|s| s.to_string()).collect()
 }
 

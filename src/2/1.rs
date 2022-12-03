@@ -26,7 +26,7 @@ fn main() {
 }
 
 fn read_input() -> String {
-    fs::read_to_string("input.txt").expect("Error reading file")
+    fs::read_to_string("input.txt").unwrap()
 }
 
 fn get_rounds(input: String) -> Vec<Round> {
@@ -39,8 +39,8 @@ fn get_rounds(input: String) -> Vec<Round> {
                 .collect();
 
             Round(
-                char_to_shape(*chars.get(0).expect("Missing 1st char")),
-                char_to_shape(*chars.get(1).expect("Missing 2nd char")),
+                char_to_shape(*chars.get(0).unwrap()),
+                char_to_shape(*chars.get(1).unwrap()),
             )
         })
         .collect()
