@@ -2,11 +2,9 @@ use std::collections::HashSet;
 use std::fs;
 
 fn main() {
-    let lines = read_input();
-
     let mut sum = 0;
 
-    for group in lines.chunks(3) {
+    for group in read_input().chunks(3) {
         let item = get_common_item(group);
         let priority = get_priority(item);
         sum += priority;
