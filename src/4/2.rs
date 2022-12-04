@@ -42,11 +42,3 @@ fn to_int(value: &str) -> i32 {
 fn overlaps(a: &Range<i32>, b: &Range<i32>) -> bool {
     (a.end >= b.start && a.start <= b.end) || (b.end >= a.start && b.start <= a.end)
 }
-
-// .....A....
-// ...BB.....
-
-// 5-7, 7-9
-// 2-8, 3-7
-// 6-6, 4-6
-// 2-6, 4-8
