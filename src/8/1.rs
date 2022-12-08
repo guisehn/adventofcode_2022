@@ -81,11 +81,7 @@ impl TreeMap {
 }
 
 fn main() {
-    let input = read_input();
+    let input = fs::read_to_string("input.txt").unwrap();
     let tree_map = TreeMap::from_str(&input);
     println!("{}", tree_map.count_trees_visible());
-}
-
-fn read_input() -> String {
-    fs::read_to_string("input.txt").unwrap()
 }
