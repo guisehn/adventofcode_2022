@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
-use std::iter::Rev;
+use std::ops::Range;
 use std::ops::RangeInclusive;
 
 #[derive(Debug)]
@@ -50,44 +50,28 @@ impl TreeMap {
             return 0;
         }
 
-        let tree_height = self.get((x, y));
+        let directions: Vec<Vec<(u32, u32)>> = vec![
+            gen_positions_reverse(y - 1..=0, |y| (x, y)),  // up
+            gen_positions(y + 1..self.size_y, |y| (x, y)), // down
+            gen_positions_reverse(x - 1..=0, |x| (x, y)),  // left
+            gen_positions(x + 1..self.size_x, |x| (x, y)), // right
+        ];
+
         let mut score = 1;
+        let tree_height = self.get((x, y));
 
-        let mut count = 0;
-        for xx in rev_range_inc(x - 1..=0) {
-            count += 1;
-            if self.get((xx, y)) >= tree_height {
-                break;
-            }
-        }
-        score *= count;
+        for direction in directions {
+            let mut count = 0;
 
-        count = 0;
-        for xx in x + 1..self.size_x {
-            count += 1;
-            if self.get((xx, y)) >= tree_height {
-                break;
+            for pos in direction {
+                count += 1;
+                if self.get(pos) >= tree_height {
+                    break;
+                }
             }
-        }
-        score *= count;
 
-        count = 0;
-        for yy in rev_range_inc(y - 1..=0) {
-            count += 1;
-            if self.get((x, yy)) >= tree_height {
-                break;
-            }
+            score *= count;
         }
-        score *= count;
-
-        count = 0;
-        for yy in y + 1..self.size_y {
-            count += 1;
-            if self.get((x, yy)) >= tree_height {
-                break;
-            }
-        }
-        score *= count;
 
         score
     }
@@ -112,11 +96,15 @@ impl TreeMap {
     }
 }
 
-// Creates an inclusive range that can be iterated backwards
-// e.g. rev_range_inc(5..=2).map(|x| x).collect::<Vec<u32>>()
-// results in vec![5, 4, 3, 2]
-fn rev_range_inc(range: RangeInclusive<u32>) -> Rev<RangeInclusive<u32>> {
-    (*range.end()..=*range.start()).rev()
+fn gen_positions_reverse<F: Fn(u32) -> (u32, u32)>(
+    range: RangeInclusive<u32>,
+    fun: F,
+) -> Vec<(u32, u32)> {
+    (*range.end()..=*range.start()).rev().map(fun).collect()
+}
+
+fn gen_positions<F: Fn(u32) -> (u32, u32)>(range: Range<u32>, fun: F) -> Vec<(u32, u32)> {
+    range.map(fun).collect()
 }
 
 fn main() {
