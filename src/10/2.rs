@@ -180,14 +180,9 @@ fn main() {
     let mut cpu = CPU::new(program);
     let mut screen = Screen::new(40, 6);
 
-    screen.draw(cpu.cycle, cpu.register_x);
-
-    loop {
-        cpu.clock();
-        if cpu.program_ended() {
-            break;
-        }
+    while !cpu.program_ended() {
         screen.draw(cpu.cycle, cpu.register_x);
+        cpu.clock();
     }
 
     screen.print();
