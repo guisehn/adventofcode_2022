@@ -37,14 +37,11 @@ impl CPU {
 
     fn addx(&mut self, num: i32) {
         if self.blocked_cycles == 0 {
-            self.blocked_cycles += 1;
+            self.blocked_cycles = 1;
         } else {
-            self.blocked_cycles -= 1;
-
-            if self.blocked_cycles == 0 {
-                self.register_x += num;
-                self.instruction_index += 1;
-            }
+            self.blocked_cycles = 0;
+            self.register_x += num;
+            self.instruction_index += 1;
         }
     }
 
