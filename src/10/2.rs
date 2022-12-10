@@ -49,17 +49,6 @@ impl CPU {
     fn program_ended(&self) -> bool {
         self.instruction_index == self.program.len
     }
-
-    // fn print_state(&self) {
-    //     println!("[CYCLE {}] X = {}", self.cycle, self.register_x);
-
-    //     match self.program.get_instruction(self.instruction_index) {
-    //         Some(instruction) => {
-    //             dbg!(instruction);
-    //         }
-    //         None => (),
-    //     };
-    // }
 }
 
 #[derive(Debug)]
