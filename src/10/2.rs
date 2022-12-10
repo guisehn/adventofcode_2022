@@ -146,8 +146,8 @@ impl Screen {
         for y in 0..self.height {
             for x in 0..self.width {
                 match &self.pixels[y][x] {
-                    true => print!("#"),
-                    false => print!("."),
+                    true => print!("# "),
+                    false => print!(". "),
                 }
             }
 
