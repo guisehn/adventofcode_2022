@@ -28,13 +28,10 @@ struct FileSystem {
 }
 
 impl FileSystem {
-    fn new() -> FileSystem {
+    fn new(space: i32) -> FileSystem {
         let mut dirs: HashMap<String, Vec<Node>> = HashMap::new();
         dirs.insert(String::from(ROOT), vec![]);
-        FileSystem {
-            dirs,
-            space: 70000000,
-        }
+        FileSystem { dirs, space }
     }
 
     fn add_dir(&mut self, parent_path: &Vec<String>, name: &str) {
@@ -98,22 +95,19 @@ fn read_input() -> String {
     fs::read_to_string("input.txt").unwrap()
 }
 
-fn parse_terminal_output(terminal: String) -> FileSystem {
-    let mut fs = FileSystem::new();
+fn parse_terminal_output(fs: &mut FileSystem, terminal: String) {
     let mut current_path: Vec<String> = vec![String::from(ROOT)];
 
     for line in terminal.trim().lines() {
         if line[0..4].eq("$ cd") {
-            cd(&mut fs, &mut current_path, &line);
+            cd(fs, &mut current_path, &line);
         } else if line[0..4].eq("dir ") {
             let dir = &line[4..];
             fs.add_dir(&current_path, dir);
         } else {
-            add_file(&mut fs, &current_path, &line);
+            add_file(fs, &current_path, &line);
         }
     }
-
-    fs
 }
 
 fn cd(fs: &mut FileSystem, current_path: &mut Vec<String>, command: &str) {
@@ -154,7 +148,10 @@ fn add_file(fs: &mut FileSystem, current_path: &Vec<String>, line: &str) {
 
 fn main() {
     let input = read_input();
-    let fs = parse_terminal_output(input);
+
+    let mut fs = FileSystem::new(70000000);
+    parse_terminal_output(&mut fs, input);
+
     let space_remaining = fs.space_remaining();
 
     let result: i32 = fs
