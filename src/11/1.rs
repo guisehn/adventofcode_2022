@@ -8,6 +8,10 @@ use std::collections::VecDeque;
 use std::fmt;
 use std::fs;
 
+// I still didn't fully understand the concept of adding lifetime <'a>,
+// but without it, we're not able to make the closures `operation` and
+// `send` access variables from their context (i.e. variables that are
+// not the fn argument).
 pub struct Monkey<'a> {
     inspect_count: i32,
     items: VecDeque<i32>,
