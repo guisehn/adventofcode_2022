@@ -10,7 +10,7 @@ use std::fs;
 
 // TIL: The 'a lifetime is needed because of the closures.
 //
-// The closures `operation` and `send` have access to variables defined
+// The closures `operation` and `get_target` have access to variables defined
 // in their context (i.e. that are not their arguments). See the build fns
 // for more context.
 //
@@ -21,9 +21,11 @@ pub struct Monkey<'a> {
     inspect_count: u32,
     items: VecDeque<u32>,
     operation: Box<dyn Fn(u32) -> u32 + 'a>,
-    send: Box<dyn Fn(u32) -> u32 + 'a>,
+    get_target: Box<dyn Fn(u32) -> u32 + 'a>,
 }
 
+// Closures do not implement derive(Debug), so we need to implement our
+// own formatter for the struct.
 impl fmt::Debug for Monkey<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -43,12 +45,12 @@ mod monkey_builder {
     pub fn build(input: &str) -> Monkey {
         let items = build_items(input);
         let operation = build_operation(input);
-        let send = build_send(input);
+        let get_target = build_get_target(input);
 
         Monkey {
             items,
             operation,
-            send,
+            get_target,
             inspect_count: 0,
         }
     }
@@ -91,7 +93,7 @@ mod monkey_builder {
         }
     }
 
-    fn build_send(input: &str) -> Box<dyn Fn(u32) -> u32> {
+    fn build_get_target(input: &str) -> Box<dyn Fn(u32) -> u32> {
         lazy_static! {
             static ref RE_TEST: Regex = Regex::new(r"Test: divisible by ([0-9]+)").unwrap();
             static ref RE_TRUE: Regex = Regex::new(r"If true: throw to monkey ([0-9]+)").unwrap();
@@ -143,7 +145,7 @@ fn main() {
                 item = (monkeys[monkey_index].operation)(item);
                 item /= 3;
 
-                let target = (monkeys[monkey_index].send)(item);
+                let target = (monkeys[monkey_index].get_target)(item);
                 monkeys[target as usize].items.push_back(item);
             }
         }
