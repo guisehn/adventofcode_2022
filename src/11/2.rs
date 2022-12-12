@@ -18,10 +18,11 @@ use std::fs;
 // needed for the compiler to know that the lifetime of these external
 // values is the same lifetime of the Monkey struct instance.
 pub struct Monkey<'a> {
-    inspect_count: u32,
-    items: VecDeque<u32>,
-    operation: Box<dyn Fn(u32) -> u32 + 'a>,
-    send: Box<dyn Fn(u32) -> u32 + 'a>,
+    inspect_count: u64,
+    division: u64,
+    items: VecDeque<u64>,
+    operation: Box<dyn Fn(u64) -> u64 + 'a>,
+    send: Box<dyn Fn(u64) -> u64 + 'a>,
 }
 
 impl fmt::Debug for Monkey<'_> {
@@ -43,17 +44,19 @@ mod monkey_builder {
     pub fn build(input: &str) -> Monkey {
         let items = build_items(input);
         let operation = build_operation(input);
-        let send = build_send(input);
+        let division = build_division(input);
+        let send = build_send(input, division);
 
         Monkey {
             items,
             operation,
             send,
             inspect_count: 0,
+            division: division,
         }
     }
 
-    fn build_items(input: &str) -> VecDeque<u32> {
+    fn build_items(input: &str) -> VecDeque<u64> {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"Starting items: (.+)").unwrap();
         }
@@ -62,13 +65,13 @@ mod monkey_builder {
         cap[1].split(", ").map(|x| x.parse().unwrap()).collect()
     }
 
-    fn build_operation(input: &str) -> Box<dyn Fn(u32) -> u32> {
+    fn build_operation(input: &str) -> Box<dyn Fn(u64) -> u64> {
         lazy_static! {
             static ref RE: Regex =
                 Regex::new(r"Operation: new = (old|[0-9]+) ([*+]) (old|[0-9]+)").unwrap();
         }
 
-        let operate = |a: u32, b: u32, operation: char| match operation {
+        let operate = |a: u64, b: u64, operation: char| match operation {
             '+' => a + b,
             '*' => a * b,
             _ => panic!("Unknown operation {}", operation),
@@ -80,32 +83,37 @@ mod monkey_builder {
         match (&cap[1], &cap[3]) {
             ("old", "old") => Box::new(move |old| operate(old, old, operator)),
             (value, "old") => {
-                let num: u32 = value.to_owned().parse().unwrap();
+                let num: u64 = value.to_owned().parse().unwrap();
                 Box::new(move |old| operate(num, old, operator))
             }
             ("old", value) => {
-                let num: u32 = value.to_owned().parse().unwrap();
+                let num: u64 = value.to_owned().parse().unwrap();
                 Box::new(move |old| operate(old, num, operator))
             }
             (&_, &_) => todo!(),
         }
     }
 
-    fn build_send(input: &str) -> Box<dyn Fn(u32) -> u32> {
+    fn build_division(input: &str) -> u64 {
         lazy_static! {
-            static ref RE_TEST: Regex = Regex::new(r"Test: divisible by ([0-9]+)").unwrap();
+            static ref RE: Regex = Regex::new(r"Test: divisible by ([0-9]+)").unwrap();
+        }
+
+        let cap = RE.captures(input).unwrap();
+        cap[1].to_owned().parse().unwrap()
+    }
+
+    fn build_send(input: &str, divisible_by: u64) -> Box<dyn Fn(u64) -> u64> {
+        lazy_static! {
             static ref RE_TRUE: Regex = Regex::new(r"If true: throw to monkey ([0-9]+)").unwrap();
             static ref RE_FALSE: Regex = Regex::new(r"If false: throw to monkey ([0-9]+)").unwrap();
         }
 
-        let cap_test = RE_TEST.captures(input).unwrap();
-        let divisible_by: u32 = cap_test[1].to_owned().parse().unwrap();
-
         let cap_true = RE_TRUE.captures(input).unwrap();
-        let true_monkey: u32 = cap_true[1].to_owned().parse().unwrap();
+        let true_monkey: u64 = cap_true[1].to_owned().parse().unwrap();
 
         let cap_false = RE_FALSE.captures(input).unwrap();
-        let false_monkey: u32 = cap_false[1].to_owned().parse().unwrap();
+        let false_monkey: u64 = cap_false[1].to_owned().parse().unwrap();
 
         Box::new(move |value| {
             let result = if value % divisible_by == 0 {
@@ -128,7 +136,10 @@ fn main() {
         .map(|item| monkey_builder::build(item))
         .collect();
 
-    for _round in 0..20 {
+    // Thanks Reddit for the trick
+    let modulo: u64 = monkeys.iter().map(|m| m.division).product();
+
+    for _round in 0..10_000 {
         // I can't do `for monkey in &mut monkeys` because the compiler
         // complains when I try to move the item to another monkey, due
         // to a duplicate mutable borrow, so we need to go with indexes.
@@ -141,7 +152,7 @@ fn main() {
 
                 let mut item = monkeys[monkey_index].items.pop_front().unwrap();
                 item = (monkeys[monkey_index].operation)(item);
-                item /= 3;
+                item %= modulo;
 
                 let target = (monkeys[monkey_index].send)(item);
                 monkeys[target as usize].items.push_back(item);
@@ -152,7 +163,7 @@ fn main() {
     monkeys.sort_by(|a, b| b.inspect_count.cmp(&a.inspect_count));
     dbg!(&monkeys);
 
-    let result: u32 = monkeys[0..2]
+    let result: u64 = monkeys[0..2]
         .iter()
         .map(|monkey| monkey.inspect_count)
         .product();
