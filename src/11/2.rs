@@ -11,8 +11,8 @@ use std::fs;
 // TIL: The 'a lifetime is needed because of the closures.
 //
 // The closures `operation` and `send` have access to variables defined
-// in their context (i.e. that are not their arguments). See that build
-// the contexts for more info.
+// in their context (i.e. that are not their arguments). See the build fns
+// for more context.
 //
 // From what I understood, annotating with the lifetime operator is
 // needed for the compiler to know that the lifetime of these external
