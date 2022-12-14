@@ -5,39 +5,36 @@
 
 use json::array;
 use json::JsonValue;
+use std::cmp::Ordering;
 use std::fs;
 
 fn main() {
-    let input = read_input();
-    let pairs = parse_pairs(&input);
-    let mut sum = 0;
+    let mut input = read_input();
+    input.push_str("\n[[2]]\n[[6]]");
 
-    for (i, (a, b)) in pairs.iter().enumerate() {
-        match is_ordered(&a, &b) {
-            Some(true) => {
-                // println!("Pair {}", i + 1);
-                sum += i + 1;
-            }
+    let mut lists = parse_lists(&input);
+    lists.sort_by(|a, b| cmp(a, b));
 
-            _ => (),
-        };
+    let mut result = 1;
+    for (i, list) in lists.iter().enumerate() {
+        if &list.dump() == "[[2]]" || &list.dump() == "[[6]]" {
+            result *= i + 1;
+        }
     }
 
-    println!("{sum}");
+    dbg!(&result);
 }
 
 fn read_input() -> String {
     fs::read_to_string("input.txt").unwrap()
 }
 
-fn parse_pairs(input: &str) -> Vec<(JsonValue, JsonValue)> {
+fn parse_lists(input: &str) -> Vec<JsonValue> {
     input
         .trim()
-        .split("\n\n")
-        .map(|pair| match pair.split_once('\n') {
-            Some((a, b)) => (json::parse(a).unwrap(), json::parse(b).unwrap()),
-            _ => panic!("Invalid pair"),
-        })
+        .lines()
+        .filter(|line| !line.trim().eq(""))
+        .map(|line| json::parse(line).unwrap())
         .collect()
 }
 
@@ -94,6 +91,14 @@ fn is_ordered(first_list: &JsonValue, second_list: &JsonValue) -> Option<bool> {
     }
 
     None
+}
+
+fn cmp(first_list: &JsonValue, second_list: &JsonValue) -> Ordering {
+    match is_ordered(&first_list, &second_list) {
+        Some(true) => Ordering::Less,
+        None => Ordering::Equal,
+        Some(false) => Ordering::Greater,
+    }
 }
 
 fn to_array(value: &JsonValue) -> JsonValue {
