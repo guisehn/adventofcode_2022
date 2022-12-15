@@ -101,8 +101,8 @@ impl Cave {
         }
     }
 
-    fn drop_sand(&mut self, from_x: u32, from_y: u32) -> bool {
-        let mut sand = Point(from_x, from_y);
+    fn drop_sand(&mut self, origin: Point) -> bool {
+        let mut sand = origin;
 
         self.map.insert(sand, Object::Sand);
 
@@ -171,7 +171,7 @@ fn main() {
     cave.add_rocks_from(&input);
 
     let mut units = 0;
-    while cave.drop_sand(500, 0) {
+    while cave.drop_sand(Point(500, 0)) {
         units += 1;
     }
 
