@@ -2,6 +2,8 @@ use std::cmp;
 use std::collections::HashMap;
 use std::fs;
 
+// Make it true to see the sand dropping on each step.
+// Very nice for debugging and visualizing, but too slow for the actual puzzle input.
 const DRAW_WHILE_FALLING: bool = false;
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]

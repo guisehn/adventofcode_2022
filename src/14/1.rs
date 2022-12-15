@@ -2,6 +2,8 @@ use std::cmp;
 use std::collections::HashMap;
 use std::fs;
 
+// Make it true to see the sand dropping on each step.
+// Very nice for debugging and visualizing, but too slow for the actual puzzle input.
 const DRAW_WHILE_FALLING: bool = false;
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
@@ -113,6 +115,7 @@ impl Cave {
         loop {
             let Point(mut x, mut y) = sand;
 
+            // Reached abyss
             if y > self.max_y {
                 return false;
             }
@@ -127,6 +130,7 @@ impl Cave {
                     y += 1;
                     x += 1;
                 } else {
+                    // Nowhere to keep falling, came to rest
                     return true;
                 }
             }
