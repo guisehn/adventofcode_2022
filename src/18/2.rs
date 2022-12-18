@@ -40,6 +40,10 @@ impl Problem {
         }
     }
 
+    // Flood fill on the exterior, aroundlava cubes:
+    // https://en.wikipedia.org/wiki/Flood_fill
+    // Later, we can count the faces of lava cubes that touch water,
+    // which will ignore faces not touching anything (air pockets)
     fn water_fill(&mut self) {
         let mut queue = VecDeque::from([Point(0, 0, 0)]);
         let mut queue_items = HashSet::<Point>::new(); // for O(1) duplicate lookup
